@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,15 +21,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-yhcpssl(uk#n2r9!vd5b^ns24w(0o451k@!ee4i01lht&b4@%7'
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+# SECRET_KEY = 'django-insecure-yhcpssl(uk#n2r9!vd5b^ns24w(0o451k@!ee4i01lht&b4@%7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+ALLOWED_HOSTS = [
+    'WebLog.pythonanywhere.com',
+]
 
 
 # Application definition
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 INSTALLED_APPS = [
     # Мои приложения
@@ -37,6 +49,7 @@ INSTALLED_APPS = [
 
     # Сторонние приложения
     'bootstrap4',
+    'debug_toolbar',
 
     # Приложения django по умолчанию
     'django.contrib.admin',
@@ -48,6 +61,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -83,8 +97,15 @@ WSGI_APPLICATION = 'learning_log.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'WebLog$default',
+        'USER': 'WebLog',
+        'PASSWORD': os.getenv('MYSQL_PASSWORD'),
+        'HOST': 'WebLog.mysql.pythonanywhere-services.com',
+        'OPTIONS': {
+            'init_command': "SET NAMES 'utf8mb4';SET sql_mode='STRICT_TRANS_TABLES'",  # режим кодировки и то что мы не хотим терять информацию при сохранении
+            'charset': 'utf8mb4',
+        },
     }
 }
 
@@ -124,6 +145,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
